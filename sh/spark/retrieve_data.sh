@@ -1,6 +1,6 @@
 #!/bin/sh
 
-## Copyright 2017 Eugenio Gianniti
+## Copyright 2017-2018 Eugenio Gianniti
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -26,6 +26,17 @@ find "$root" -name summary.csv -type f | while IFS= read -r filename; do
     destdir="$query/$vm"
     mkdir -p "$destdir"
 
-    destfile="$destdir/$cores.csv"
-    cp "$filename" "$destfile"
+    destname="$cores.csv"
+    destfile="$destdir/$destname"
+
+    if ls "$destdir" | grep -q "^$destname$"; then
+        tmp="$destdir/aux.csv"
+        {
+            cat "$destfile"
+            tail -n +3 "$filename"
+        } > "$tmp"
+        mv "$tmp" "$destfile"
+    else
+        cp "$filename" "$destfile"
+    fi
 done
