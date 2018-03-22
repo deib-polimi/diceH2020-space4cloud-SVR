@@ -1,4 +1,4 @@
-## Copyright 2017 Eugenio Gianniti
+## Copyright 2017-2018 Eugenio Gianniti
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -16,11 +16,15 @@ clear all
 close all hidden
 clc
 
-interesting_index = 12;
-csv_file = "/Users/eugenio/Desktop/Q26-per-ml/no_max/120.csv";
-model_file = "/Users/eugenio/Desktop/Q26-per-ml/no_max/model.txt";
+interesting_index = 4;
+directory = "/Users/eugenio/Dottorato/Experiment Results/Power8/500/ml/query55";
+csv_name = "44.csv";
+model_name = "model.txt";
 
 %% End of the configurations
+
+csv_file = [directory, "/", csv_name];
+model_file = [directory, "/", model_name];
 
 load (model_file);
 
