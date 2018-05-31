@@ -1,4 +1,4 @@
-## Copyright 2017 Eugenio Gianniti
+## Copyright 2017-2018 Eugenio Gianniti
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -14,10 +14,13 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{data} =} read_csv_table (@var{filename})
+## @deftypefnx {Function File} {@var{data} =} read_csv_table (@var{filename}, @var{skip})
 ##
 ## Read the @var{data} stored in a CSV called @var{filename} and
 ## return it as a structure whose field names are taken from the
 ## first line in the file.
+## Optionally, you can configure a number of lines to @var{skip}
+## at the beginning of the file.
 ## Numeric columns are turned into column vectors, other general
 ## data types are cell arrays.
 ##
@@ -26,12 +29,12 @@
 ## @seealso{csv2cell}
 ## @end deftypefn
 
-function data = read_csv_table (filename)
+function data = read_csv_table (filename, skip = 0)
 
   if (ischar (filename))
     pkg load io;
 
-    raw = csv2cell (filename);
+    raw = csv2cell (filename, skip);
 
     data = struct ();
     names = raw(1, :);
