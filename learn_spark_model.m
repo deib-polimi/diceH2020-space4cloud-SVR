@@ -1,5 +1,5 @@
-## Copyright 2017 Eugenio Gianniti
-## 
+## Copyright 2017-2018 Eugenio Gianniti
+##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
 ## You may obtain a copy of the License at
@@ -34,8 +34,9 @@ configuration.epsilon_range = linspace (1e-4, 1, 20);
 
 experimental_data = cell (size (configuration.runs));
 for (ii = 1:numel (configuration.runs))
-  experimental_data{ii} = ...
-    read_data (sprintf ("%s/%d.csv", base_directory, configuration.runs(ii)));
+  inbase = sprintf ("%d.csv", configuration.runs(ii));
+  filename = fullfile (base_directory, inbase);
+  experimental_data{ii} = read_data (filename);
 endfor
 
 clean_experimental_data = cellfun (@(A) nthargout (1, @clear_outliers, A),
@@ -83,7 +84,8 @@ train_error = results.train_error;
 test_error = results.test_error;
 cv_error = results.cv_error;
 
-one_table = sprintf ("%s/%d.csv", base_directory, configuration.runs(1));
+inbase = sprintf ("%d.csv", configuration.runs(1));
+one_table = fullfile (base_directory, inbase);
 fid = fopen (one_table, "r");
 first_line = fgetl (fid);
 second_line = strtrim (fgetl (fid));
@@ -91,10 +93,10 @@ fclose (fid);
 
 query = strtrim (strrep (first_line, "Application class:", ""));
 headers = strsplit (second_line, ",");
-% +1 to discard the applicationId, 2:end to avoid the predicted time
+  % +1 to discard the applicationId, 2:end to avoid the predicted time
 useful_headers = { headers{useful_columns(2:end) + 1} }';
 
-outfilename = [base_directory, "/model.txt"];
+outfilename = fullfile (base_directory, "model.txt");
 save (outfilename, "b", "w", "useful_headers", "useful_columns", "working_mu",
       "working_sigma", "C", "epsilon", "train_error", "test_error", "cv_error");
 
@@ -128,7 +130,7 @@ full_data.(query) = data;
 
 pkg load io
 json_content = object2json (full_data);
-json_filename = [base_directory, "/model.json"];
+json_filename = fullfile (base_directory, "model.json");
 fid = fopen (json_filename, "w");
 fdisp (fid, json_content);
 fclose (fid);
