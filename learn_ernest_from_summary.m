@@ -58,8 +58,13 @@ theta = lsqnonneg (X_tr, y_tr);
 y_hat_tr = X_tr * theta;
 y_hat_tst = X_tst * theta;
 
-train_mape = 100 * mean (abs ((y_tr - y_hat_tr) ./ y_tr));
-test_mape = 100 * mean (abs ((y_tst - y_hat_tst) ./ y_tst));
+abs_residuals_train = abs ((y_tr - y_hat_tr) ./ y_tr);
+abs_residuals_test = abs ((y_tst - y_hat_tst) ./ y_tst);
+
+train_mape = 100 * mean (abs_residuals_train);
+test_mape = 100 * mean (abs_residuals_test);
+max_train_pe = 100 * max (abs_residuals_train);
+max_test_pe = 100 * max (abs_residuals_test);
 
 fid = fopen (infile, "r");
 first_line = fgetl (fid);
