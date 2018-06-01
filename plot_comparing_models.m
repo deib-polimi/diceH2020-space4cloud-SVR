@@ -16,7 +16,7 @@ clear all
 close all hidden
 clc
 
-root = pwd;
+root = "/Users/eugenio/Dottorato/Experiment Results/TPCDS500-D_processed_logs";
 
 data_root = fullfile (root, "data");
 sim_root = fullfile (root, "..", "dagsim-processed");
@@ -102,7 +102,7 @@ for ([query_data, query] = avg)
     sim_times /= 1000;
 
     if (plot_dagsim)
-      name = ["Dagsim ", query, " ", vm];
+      name = ["dagSim ", query, " ", vm];
       plot (sim_cores, sim_times, ":", "color", color, "DisplayName", name);
     endif
 
@@ -211,13 +211,13 @@ if (plot_dagsim)
   grid on;
   axis auto;
   legend Location EastOutside;
-  title ("Dagsim vs real, signed");
+  title ("dagSim vs real, signed");
   xlabel Cores;
   ylabel ("Signed error [%]");
 
   figure;
   hold all;
-  disp ("Dagsim");
+  disp ("dagSim");
 
   for (ii = 1:numel (abs_err))
     cores = real_cores{ii};
@@ -227,12 +227,13 @@ if (plot_dagsim)
 
     disp (name);
     average = mean (err)
+    maximum = max (err)
   endfor
 
   grid on;
   axis auto;
   legend Location EastOutside;
-  title ("Dagsim vs real");
+  title ("dagSim vs real");
   xlabel Cores;
   ylabel ("Relative error [%]");
 endif
@@ -267,6 +268,7 @@ if (plot_ml)
 
     disp (name);
     average = mean (err)
+    maximum = max (err)
   endfor
 
   grid on;
@@ -307,6 +309,7 @@ if (plot_chi)
 
     disp (name);
     average = mean (err)
+    maximum = max (err)
   endfor
 
   grid on;
@@ -347,6 +350,7 @@ if (plot_ernest)
 
     disp (name);
     average = mean (err)
+    maximum = max (err)
   endfor
 
   grid on;
