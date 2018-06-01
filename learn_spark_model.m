@@ -16,11 +16,11 @@ clear all
 close all hidden
 clc
 
-base_directory = "/Users/eugenio/Desktop/Azure-merged-data-A-D/ml/Q26";
+base_directory = "/Users/eugenio/Dottorato/Experiment Results/TPCDS500-D_processed_logs/ml/Q26";
 
 only_containers = false;
 
-configuration.runs = [6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48 52];
+configuration.runs = [12 16 20 24 28 32 36 40 44 48 52];
 configuration.missing_runs = [];
 
 configuration.train_fraction = 0.6;
@@ -42,9 +42,10 @@ endfor
 clean_experimental_data = cellfun (@(A) nthargout (1, @clear_outliers, A),
                                    experimental_data, "UniformOutput", false);
 
-avg_times = cellfun (@(A) mean (A(:, 1)), clean_experimental_data);
+avg_times = cellfun (@(A) mean (A(:, 1) - A(:, 2)), clean_experimental_data);
 
 sample = vertcat (clean_experimental_data{:});
+sample(:, 1) -= sample(:, 2);
 sample(:, end) = 1 ./ sample(:, end);
 
 idx = randperm (rows (sample));
@@ -55,6 +56,7 @@ shuffled = sample(idx, :);
 constant_columns = find (sigma == 0);
 cols = 1:columns (shuffled);
 useful_columns = setdiff (cols, constant_columns);
+useful_columns = setdiff (useful_columns, [2]);
 working_sample = shuffled(:, useful_columns);
 working_mu = mu(useful_columns);
 working_sigma = sigma(useful_columns);
