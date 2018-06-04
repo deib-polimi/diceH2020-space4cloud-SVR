@@ -166,10 +166,7 @@ for ([query_data, query] = avg)
     chi_sign_err{end + 1} = chi_err;
     chi_abs_err{end + 1} = abs (chi_err);
 
-    one = ones (size (datasizes));
-    sm = datasizes ./ cores;
-    lm = log2 (cores);
-    X = [one, sm, lm, cores];
+    X = build_ernest_matrix (datasizes, cores);
 
     ernest_predictions = X * current_ernest.theta;
     ernest_predictions /= 1000;

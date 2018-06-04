@@ -17,7 +17,7 @@ close all hidden;
 clc;
 
 comparison_file = "/Users/eugenio/Downloads/real_vs_dagsim.csv";
-ml_dir = "/Users/eugenio/Dottorato/Experiment Results/TPCDS500-D_processed_logs/ml";
+ml_dir = "/Users/eugenio/Downloads/ernest";
 
 %% End of configuration
 
@@ -27,13 +27,6 @@ function [cores, datasize] = parse_experiment (experiment)
   cores_per_vm = str2num (tokens{2});
   datasize = str2num (tokens{4});
   cores = machines * cores_per_vm;
-endfunction
-
-function X = make_ernest_matrix (datasize, machines)
-  sm = datasize ./ machines;
-  lm = log2 (machines);
-  one = ones (size (machines));
-  X = [one, sm, lm, machines];
 endfunction
 
 dagsim = read_csv_table (comparison_file);
@@ -56,7 +49,7 @@ for (ii = 1:numel (queries))
 
   [cores, datasizes] = cellfun (@parse_experiment, current_experiments);
   all_cores(idx) = cores;
-  X = make_ernest_matrix (datasizes, cores);
+  X = build_ernest_matrix (datasizes, cores);
   y_hat = X * current_ernest.theta;
   all_ernest(idx) = 100 * (y_hat - current_times) ./ current_times;
 endfor

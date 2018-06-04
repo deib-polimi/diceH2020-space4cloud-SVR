@@ -16,13 +16,13 @@ clear all;
 close all hidden;
 clc;
 
-infile = "/Users/eugenio/Downloads/ernest/Q26-Azure-D12v2.csv";
+infile = "/Users/eugenio/Downloads/ernest/Q52-Azure-D12v2.csv";
 outdir = "/Users/eugenio/Downloads/ernest";
 
 use_nnls = true;
 
-missing_cores = 24:4:52;
-missing_datasizes = [];
+missing_cores = 32:4:52;
+missing_datasizes = [750 1000];
 
 seed = 17;
 train_fraction = 0.8;
@@ -69,27 +69,18 @@ n_test = numel (idx_tst);
 y_tr = available_sample(idx_tr, 1);
 datasize_tr = available_sample(idx_tr, 2);
 cores_tr = available_sample(idx_tr, 3);
-one = ones (size (y_tr));
-sm = datasize_tr ./ cores_tr;
-lm = log2 (cores_tr);
-X_tr = [one, sm, lm, cores_tr];
+X_tr = build_ernest_matrix (datasize_tr, cores_tr);
 
 y_tst = available_sample(idx_tst, 1);
 datasize_tst = available_sample(idx_tst, 2);
 cores_tst = available_sample(idx_tst, 3);
-one = ones (size (y_tst));
-sm = datasize_tst ./ cores_tst;
-lm = log2 (cores_tst);
-X_tst = [one, sm, lm, cores_tst];
+X_tst = build_ernest_matrix (datasize_tst, cores_tst);
 
 if (n_missing > 0)
   y_miss = missing_sample(:, 1);
   datasize_miss = missing_sample(:, 2);
   cores_miss = missing_sample(:, 3);
-  one = ones (size (y_miss));
-  sm = datasize_miss ./ cores_miss;
-  lm = log2 (cores_miss);
-  X_miss = [one, sm, lm, cores_miss];
+  X_miss = build_ernest_matrix (datasize_miss, cores_miss);
 else
   y_miss = NaN (0, 1);
   X_miss = NaN (0, 4);

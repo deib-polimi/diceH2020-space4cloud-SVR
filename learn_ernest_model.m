@@ -45,6 +45,7 @@ clean_experimental_data = cellfun (@(A) nthargout (1, @clear_outliers, A),
 
 sample = vertcat (clean_experimental_data{available_idx});
 missing_sample = vertcat (clean_experimental_data{missing_idx});
+n_miss = rows (missing_sample);
 
 rand ("seed", configuration.seed);
 n = rows (sample);
@@ -57,32 +58,21 @@ n_test = numel (idx_tst);
 y_tr = sample(idx_tr, 1);
 datasize_tr = sample(idx_tr, 2);
 cores_tr = sample(idx_tr, 3);
-one = ones (size (y_tr));
-sm = datasize_tr ./ cores_tr;
-lm = log2 (cores_tr);
-X_tr = [one, sm, lm, cores_tr];
+X_tr = build_ernest_matrix (datasize_tr, cores_tr);
 
 y_tst = sample(idx_tst, 1);
 datasize_tst = sample(idx_tst, 2);
 cores_tst = sample(idx_tst, 3);
-one = ones (size (y_tst));
-sm = datasize_tst ./ cores_tst;
-lm = log2 (cores_tst);
-X_tst = [one, sm, lm, cores_tst];
+X_tst = build_ernest_matrix (datasize_tst, cores_tst);
 
-if (isempty (missing_sample))
-  y_miss = NaN (0, 1);
-  X_miss = NaN (0, 4);
-  n_miss = NaN;
-else
-  n_miss = rows (missing_sample);
+if (n_miss > 0)
   y_miss = missing_sample(:, 1);
   datasize_miss = missing_sample(:, 2);
   cores_miss = missing_sample(:, 3);
-  one = ones (n_miss, 1);
-  sm = datasize_miss ./ cores_miss;
-  lm = log2 (cores_miss);
-  X_miss = [one, sm, lm, cores_miss];
+  X_miss = build_ernest_matrix (datasize_miss, cores_miss);
+else
+  y_miss = NaN (0, 1);
+  X_miss = NaN (0, 4);
 endif
 
 theta = lsqnonneg (X_tr, y_tr);
