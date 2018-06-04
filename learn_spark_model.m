@@ -12,9 +12,9 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
-clear all
-close all hidden
-clc
+clear all;
+close all hidden;
+clc;
 
 base_directory = "/Users/eugenio/Dottorato/Experiment Results/TPCDS500-D_processed_logs/ml/Q26";
 
@@ -23,6 +23,7 @@ only_containers = false;
 configuration.runs = [12 16 20 24 28 32 36 40 44 48 52];
 configuration.missing_runs = [];
 
+configuration.seed = 17;
 configuration.train_fraction = 0.6;
 configuration.test_fraction = 0.2;
 
@@ -44,10 +45,14 @@ clean_experimental_data = cellfun (@(A) nthargout (1, @clear_outliers, A),
 
 avg_times = cellfun (@(A) mean (A(:, 1) - A(:, 2)), clean_experimental_data);
 
-sample = vertcat (clean_experimental_data{:});
+[available_idx, missing_idx] = find_configurations (configuration.runs, ...
+                                                    configuration.missing_runs);
+
+sample = vertcat (clean_experimental_data{available_idx});
 sample(:, 1) -= sample(:, 2);
 sample(:, end) = 1 ./ sample(:, end);
 
+rand ("seed", configuration.seed);
 idx = randperm (rows (sample));
 shuffled = sample(idx, :);
 
@@ -95,12 +100,13 @@ fclose (fid);
 
 query = strtrim (strrep (first_line, "Application class:", ""));
 headers = strsplit (second_line, ",");
-  % +1 to discard the applicationId, 2:end to avoid the predicted time
+% +1 to discard the applicationId, 2:end to avoid the predicted time
 useful_headers = { headers{useful_columns(2:end) + 1} }';
 
 outfilename = fullfile (base_directory, "model.txt");
-save (outfilename, "b", "w", "useful_headers", "useful_columns", "working_mu",
-      "working_sigma", "C", "epsilon", "train_error", "test_error", "cv_error");
+save (outfilename, "b", "w", "useful_headers", "useful_columns", ...
+      "working_mu", "working_sigma", "C", "epsilon", ...
+      "train_error", "test_error", "cv_error", "configuration");
 
 data.b = b;
 data.mu_t = working_mu(1);
@@ -111,12 +117,15 @@ for (ii = 1:numel (w))
   feature.mu = working_mu(ii + 1);
   feature.sigma = working_sigma(ii + 1);
   name = useful_headers{ii};
+
   if (strcmp (name, "nContainers"))
     name = "x";
   endif
+
   if (strcmp (name, "users"))
     name = "h";
   endif
+
   features.(name) = feature;
 endfor
 
