@@ -12,15 +12,17 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
-clear all
-close all hidden
-clc
+clear all;
+close all hidden;
+clc;
 
-base_directory = "/Users/eugenio/Dottorato/Experiment Results/Azure-merged-data-A-D/ml/Q52";
+base_directory = "/Users/eugenio/Dottorato/Experiment Results/TPCDS500-D_processed_logs/ml/Q26";
 
-configuration.runs = [6 8 10 12 14 16 18 20 22 24 26 28 32 34 36 38 40 42 44 46 48 52];
+configuration.runs = [12 16 20 24 28 32 36 40 44 48 52];
+configuration.missing_runs = [];
 
-train_fraction = 0.8;
+configuration.seed = 17;
+configuration.train_fraction = 0.8;
 
 %% End of configuration
 
@@ -38,11 +40,16 @@ endfor
 clean_experimental_data = cellfun (@(A) nthargout (1, @clear_outliers, A),
                                    experimental_data, "UniformOutput", false);
 
-sample = vertcat (clean_experimental_data{:});
+[available_idx, missing_idx] = find_configurations (configuration.runs, ...
+                                                    configuration.missing_runs);
 
+sample = vertcat (clean_experimental_data{available_idx});
+missing_sample = vertcat (clean_experimental_data{missing_idx});
+
+rand ("seed", configuration.seed);
 n = rows (sample);
 idx = randperm (n);
-n_train = round (train_fraction * n);
+n_train = round (configuration.train_fraction * n);
 idx_tr = idx(1:n_train);
 idx_tst = idx(n_train + 1:end);
 n_test = numel (idx_tst);
@@ -63,21 +70,39 @@ sm = datasize_tst ./ cores_tst;
 lm = log2 (cores_tst);
 X_tst = [one, sm, lm, cores_tst];
 
+if (isempty (missing_sample))
+  y_miss = NaN (0, 1);
+  X_miss = NaN (0, 4);
+  n_miss = NaN;
+else
+  n_miss = rows (missing_sample);
+  y_miss = missing_sample(:, 1);
+  datasize_miss = missing_sample(:, 2);
+  cores_miss = missing_sample(:, 3);
+  one = ones (n_miss, 1);
+  sm = datasize_miss ./ cores_miss;
+  lm = log2 (cores_miss);
+  X_miss = [one, sm, lm, cores_miss];
+endif
+
 theta = lsqnonneg (X_tr, y_tr);
 
 y_hat_tr = X_tr * theta;
 y_hat_tst = X_tst * theta;
+y_hat_miss = X_miss * theta;
 
 train_mape = 100 * mean (abs ((y_tr - y_hat_tr) ./ y_tr));
 test_mape = 100 * mean (abs ((y_tst - y_hat_tst) ./ y_tst));
+missing_mape = 100 * mean (abs ((y_miss - y_hat_miss) ./ y_miss));
 
-one_table = sprintf ("%s/%d.csv", base_directory, configuration.runs(1));
+name = sprintf ("%d.csv", configuration.runs(1));
+one_table = fullfile (base_directory, name);
 fid = fopen (one_table, "r");
 first_line = fgetl (fid);
-fclose (fid);
+[~] = fclose (fid);
 
 query = strtrim (strrep (first_line, "Application class:", ""));
 
 outfilename = fullfile (base_directory, "ernest.txt");
 save (outfilename, "query", "theta", "n_train", "train_mape", ...
-      "n_test", "test_mape");
+      "n_test", "test_mape", "n_miss", "missing_mape", "configuration");
