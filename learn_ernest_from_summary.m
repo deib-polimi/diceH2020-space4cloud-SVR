@@ -19,7 +19,9 @@ clc;
 infile = "/Users/eugenio/Downloads/ernest/Q26-Azure-D12v2.csv";
 outdir = "/Users/eugenio/Downloads/ernest";
 
-missing_cores = [];
+use_nnls = true;
+
+missing_cores = 24:4:52;
 missing_datasizes = [];
 
 seed = 17;
@@ -93,7 +95,12 @@ else
   X_miss = NaN (0, 4);
 endif
 
-theta = lsqnonneg (X_tr, y_tr);
+if (use_nnls)
+  theta = lsqnonneg (X_tr, y_tr);
+else
+  pkg load statistics;
+  theta = regress (y_tr, X_tr);
+endif
 
 y_hat_tr = X_tr * theta;
 y_hat_tst = X_tst * theta;
@@ -116,9 +123,11 @@ first_line = fgetl (fid);
 
 query = strtrim (strrep (first_line, "Application class:", ""));
 
-outbase = [query, ".txt"];
+techniques = {"OLS", "NNLS"};
+technique = techniques{1 + use_nnls};
+outbase = sprintf ("%s-%s.txt", query, technique);
 outfilename = fullfile (outdir, outbase);
-save (outfilename, "query", "theta", ...
+save (outfilename, "query", "technique", "seed", "theta", ...
       "available_cores", "missing_cores", ...
       "available_datasizes", "missing_datasizes", ...
       "n_train", "train_mape", "max_train_pe", ...
