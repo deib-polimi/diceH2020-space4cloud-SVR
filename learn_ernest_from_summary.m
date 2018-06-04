@@ -53,6 +53,8 @@ missing_idx = cores_idx | datasize_idx;
 available_sample = sample(! missing_idx, :);
 missing_sample = sample(missing_idx, :);
 n_missing = sum (missing_idx);
+available_cores = unique (available_sample(:, end));
+available_datasizes = unique (available_sample(:, end - 1));
 
 rand ("seed", seed);
 n = rows (available_sample);
@@ -117,6 +119,8 @@ query = strtrim (strrep (first_line, "Application class:", ""));
 outbase = [query, ".txt"];
 outfilename = fullfile (outdir, outbase);
 save (outfilename, "query", "theta", ...
+      "available_cores", "missing_cores", ...
+      "available_datasizes", "missing_datasizes", ...
       "n_train", "train_mape", "max_train_pe", ...
       "n_test", "test_mape", "max_test_pe", ...
       "n_missing", "missing_mape", "max_missing_pe");
