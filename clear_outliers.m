@@ -1,4 +1,4 @@
-## Copyright 2016 Eugenio Gianniti
+## Copyright 2016-2018 Eugenio Gianniti
 ##
 ## Licensed under the Apache License, Version 2.0 (the "License");
 ## you may not use this file except in compliance with the License.
@@ -24,19 +24,19 @@
 
 function [clean, indices] = clear_outliers (dirty)
 
-avg = mean (dirty);
-dev = std (dirty);
-cols = size (dirty, 2);
+  avg = mean (dirty);
+  dev = std (dirty);
+  cols = columns (dirty);
 
-clean = dirty;
-indices = 1:size (dirty, 1)';
+  clean = dirty;
+  indices = (1:rows (dirty))';
 
-for (jj = 1:cols)
-  if (dev(jj) > 0)
-    idx = (abs (clean(:, jj) - avg(jj)) < 3 * dev(jj));
-    clean = clean(idx, :);
-    indices = indices(idx);
-  endif
-endfor
+  for (jj = 1:cols)
+    if (dev(jj) > 0)
+      idx = (abs (clean(:, jj) - avg(jj)) < 3 * dev(jj));
+      clean = clean(idx, :);
+      indices = indices(idx);
+    endif
+  endfor
 
 endfunction
