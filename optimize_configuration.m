@@ -16,10 +16,10 @@ clear all;
 close all hidden;
 clc;
 
-ernest_txt = "/Users/eugenio/Dottorato/Experiment Results/Ernest/query52-NNLS.txt";
-ml_root = "/Users/eugenio/Dottorato/Experiment Results/TPCDS500-D_processed_logs/ml/Q52";
+ernest_txt = "/Users/eugenio/Dottorato/Experiment Results/Ernest/query26-NNLS.txt";
+ml_root = "/Users/eugenio/Dottorato/Experiment Results/TPCDS500-D_processed_logs/ml/Q26";
 initial_idx = 1;
-deadline = 180e3;
+deadline = 360e3;
 cores_per_vm = 4;
 
 %% End configuration
@@ -50,22 +50,23 @@ chi_0 = mu(1) + ml.b * sigma(1) - chi_c * mu(end) + ...
         sigma(1) * X_0 * ml.w(1:end - 1);
 
 c_0 = chi_c / (deadline - chi_0);
-nu1 = nu_0 = ceil (c_0 / cores_per_vm);
+nu_0 = ceil (c_0 / cores_per_vm);
+nu1 = max (nu_0, 1);
 
 %% First feasibility assessment
-c = cores_per_vm * nu_0;
+c = cores_per_vm * nu1;
 X = build_ernest_matrix (datasize, c);
 t1 = X * ernest.theta;
 feasible = (t1 <= deadline);
 
 if (feasible)
-  bounds.upper = nu_0;
+  bounds.upper = nu1;
   bounds.lower = 0;
-  nu = nu_0 - 1;
+  nu = nu1 - 1;
 else
-  bounds.lower = nu_0;
+  bounds.lower = nu1;
   bounds.upper = +Inf;
-  nu = nu_0 + 1;
+  nu = nu1 + 1;
 endif
 
 %% Auxiliary functions
