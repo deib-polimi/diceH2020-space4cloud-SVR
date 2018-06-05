@@ -37,7 +37,7 @@ data = read_data (filename);
 data(:, 1) -= data(:, 2);
 data(:, end) = 1 ./ data(:, end);
 relevant = data(initial_idx, ml.useful_columns);
-datasize = relevant(end - 1);
+datasize = data(initial_idx, end - 1);
 
 mu = ml.working_mu';
 sigma = ml.working_sigma';
@@ -121,8 +121,11 @@ do
 until (bounds.upper - bounds.lower == 1);
 
 %% Final solution
+query = ernest.query
+datasize
 nu_opt = bounds.upper
 c_opt = cores_per_vm * nu_opt
 X_opt = build_ernest_matrix (datasize, c_opt);
 t_opt = X_opt * ernest.theta
+deadline
 perc_err = 100 * (deadline - t_opt) / deadline
