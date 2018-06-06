@@ -16,11 +16,12 @@ clear all;
 close all hidden;
 clc;
 
-ernest_txt = "/Users/eugenio/Dottorato/Experiment Results/Ernest/query26-NNLS.txt";
-ml_root = "/Users/eugenio/Dottorato/Experiment Results/TPCDS500-D_processed_logs/ml/Q26";
+ernest_txt = "/Users/eugenio/Dottorato/Experiment Results/POWER8/full/ml/query40/ernest.txt";
+ml_root = "/Users/eugenio/Dottorato/Experiment Results/POWER8/1000/ml/query40";
 initial_idx = 1;
-deadline = 360e3;
-cores_per_vm = 4;
+deadline = 1337868;
+cores_per_vm = 2;
+stringent_bound_for_derivative = true;
 
 %% End configuration
 
@@ -42,6 +43,28 @@ datasize = data(initial_idx, end - 1);
 mu = ml.working_mu';
 sigma = ml.working_sigma';
 scaled = (relevant - mu) ./ sigma;
+
+labeled_data = read_csv_table (filename, 1);
+labels = fieldnames (labeled_data);
+idx = strncmp (labels, "nTask", 5);
+tasks = max (cellfun (@(l) max (labeled_data.(l)), labels(idx)));
+max_vms = ceil (tasks / cores_per_vm);
+
+if (stringent_bound_for_derivative)
+  theta_der = ernest.theta(2:end);
+
+  if (theta_der(3) > 0)
+    crossing = (sqrt (theta_der(2) ^ 2 + ...
+                      4 * theta_der(1) * theta_der(3) * datasize) - ...
+                theta_der(2)) / 4 / theta_der(3);
+  elseif (theta_der(2) > 0)
+    crossing = theta_der(1) * datasize / theta_der(2);
+  endif
+
+  max_upper = min (round (crossing), max_vms);
+else
+  max_upper = max_vms;
+endif
 
 %% Initial guess with ML
 X_0 = scaled(:, 2:end - 1);
@@ -65,7 +88,7 @@ if (feasible)
   nu = nu1 - 1;
 else
   bounds.lower = nu1;
-  bounds.upper = +Inf;
+  bounds.upper = max_upper;
   nu = nu1 + 1;
 endif
 
@@ -99,7 +122,11 @@ function nu = hyperbola (nu1, t1, nu2, t2, deadline)
 endfunction
 
 %% Local search with hyperbola
+iterations = 0;
+
 do
+  ++iterations;
+
   c = cores_per_vm * nu;
 
   nu2 = nu1;
@@ -123,6 +150,7 @@ until (bounds.upper - bounds.lower == 1);
 %% Final solution
 query = ernest.query
 datasize
+iterations
 nu_opt = bounds.upper
 c_opt = cores_per_vm * nu_opt
 X_opt = build_ernest_matrix (datasize, c_opt);
