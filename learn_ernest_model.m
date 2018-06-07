@@ -16,9 +16,11 @@ clear all;
 close all hidden;
 clc;
 
-base_directory = "/Users/eugenio/Dottorato/Experiment Results/TPCDS500-D_processed_logs/ml/Q26";
+base_directory = "/Users/eugenio/Dottorato/Experiment Results/POWER8/full/ml/query40";
 
-configuration.runs = [12 16 20 24 28 32 36 40 44 48 52];
+use_nnls = true;
+
+configuration.runs = [6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44];
 configuration.missing_runs = [];
 
 configuration.seed = 17;
@@ -75,7 +77,12 @@ else
   X_miss = NaN (0, 4);
 endif
 
-theta = lsqnonneg (X_tr, y_tr);
+if (use_nnls)
+  theta = lsqnonneg (X_tr, y_tr);
+else
+  pkg load statistics;
+  theta = regress (y_tr, X_tr);
+endif
 
 y_hat_tr = X_tr * theta;
 y_hat_tst = X_tst * theta;
@@ -93,6 +100,7 @@ first_line = fgetl (fid);
 
 query = strtrim (strrep (first_line, "Application class:", ""));
 
-outfilename = fullfile (base_directory, "ernest.txt");
+bases = {"ernest_ols.txt", "ernest_nnls.txt"};
+outfilename = fullfile (base_directory, bases{1 + use_nnls});
 save (outfilename, "query", "theta", "n_train", "train_mape", ...
       "n_test", "test_mape", "n_miss", "missing_mape", "configuration");
