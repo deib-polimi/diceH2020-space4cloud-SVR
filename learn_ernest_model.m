@@ -19,6 +19,7 @@ clc;
 base_directory = "/Users/eugenio/Dottorato/Experiment Results/POWER8/full/ml/query40";
 
 use_nnls = true;
+features = true (1, 4);
 
 configuration.runs = [6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44];
 configuration.missing_runs = [];
@@ -60,21 +61,24 @@ n_test = numel (idx_tst);
 y_tr = sample(idx_tr, 1);
 datasize_tr = sample(idx_tr, 2);
 cores_tr = sample(idx_tr, 3);
-X_tr = build_ernest_matrix (datasize_tr, cores_tr);
+full_X_tr = build_ernest_matrix (datasize_tr, cores_tr);
+X_tr = full_X_tr(:, features);
 
 y_tst = sample(idx_tst, 1);
 datasize_tst = sample(idx_tst, 2);
 cores_tst = sample(idx_tst, 3);
-X_tst = build_ernest_matrix (datasize_tst, cores_tst);
+full_X_tst = build_ernest_matrix (datasize_tst, cores_tst);
+X_tst = full_X_tst(:, features);
 
 if (n_miss > 0)
   y_miss = missing_sample(:, 1);
   datasize_miss = missing_sample(:, 2);
   cores_miss = missing_sample(:, 3);
-  X_miss = build_ernest_matrix (datasize_miss, cores_miss);
+  full_X_miss = build_ernest_matrix (datasize_miss, cores_miss);
+  X_miss = full_X_miss(:, features);
 else
   y_miss = NaN (0, 1);
-  X_miss = NaN (0, 4);
+  X_miss = NaN (0, sum (features));
 endif
 
 if (use_nnls)
@@ -102,5 +106,5 @@ query = strtrim (strrep (first_line, "Application class:", ""));
 
 bases = {"ernest_ols.txt", "ernest_nnls.txt"};
 outfilename = fullfile (base_directory, bases{1 + use_nnls});
-save (outfilename, "query", "theta", "n_train", "train_mape", ...
+save (outfilename, "query", "features", "theta", "n_train", "train_mape", ...
       "n_test", "test_mape", "n_miss", "missing_mape", "configuration");

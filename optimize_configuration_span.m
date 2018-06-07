@@ -28,11 +28,13 @@ save_plots = false;
 
 ernest = load (ernest_txt);
 query = ernest.query;
+features = ernest.features;
 
 vms = (lowest_vms:highest_vms)';
 cores = cores_per_vm * vms;
 datasizes = datasize * ones (size (cores));
-X = build_ernest_matrix (datasizes, cores);
+full_X = build_ernest_matrix (datasizes, cores);
+X = full_X(:, features);
 t = X * ernest.theta;
 
 deviations = deadline - t;
@@ -61,8 +63,9 @@ if (save_plots)
   filename = sprintf ("%s-datasize%d-deadline%.0f-cores%d", ...
                       query, datasize, deadline, cores_per_vm);
   print ("-depsc2", filename);
-  pause (1);
 endif
+
+pause (1);
 
 %% Final solution
 [c_opt, idx] = min (c_feasible);
@@ -71,6 +74,7 @@ nu_opt = c_opt / cores_per_vm;
 
 %% Output
 query
+features
 datasize
 nu_opt
 c_opt
