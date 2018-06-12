@@ -15,8 +15,11 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{X} =} build_ernest_matrix (@var{datasizes}, @var{machines})
 ##
-## Given a vector of @var{datasizes} and one of @var{machines}, create
-## the design matrix @var{X} to learn the Ernest model.
+## Given a vector of @var{datasizes} and one of @var{machines},
+## create the design matrix @var{X} to learn the Ernest model.
+## The last column is squared @var{datasizes} divided by
+## @var{machines}, which is one of the additional features discussed
+## in their paper.
 ##
 ## @end deftypefn
 
@@ -35,8 +38,9 @@ function X = build_ernest_matrix (datasizes, machines)
   endif
 
   sm = datasizes ./ machines;
+  s2m = datasizes .^ 2 ./ machines;
   lm = log2 (machines);
   one = ones (size (machines));
-  X = [one, sm, lm, machines];
+  X = [one, sm, lm, machines, s2m];
 
 endfunction

@@ -20,6 +20,8 @@ infile = "/Users/eugenio/Downloads/ernest/Q52-Azure-D12v2.csv";
 outdir = "/Users/eugenio/Downloads/ernest";
 
 use_nnls = true;
+features = true(1, 5);
+features(end) = false;
 
 missing_cores = 32:4:52;
 missing_datasizes = [750 1000];
@@ -69,21 +71,24 @@ n_test = numel (idx_tst);
 y_tr = available_sample(idx_tr, 1);
 datasize_tr = available_sample(idx_tr, 2);
 cores_tr = available_sample(idx_tr, 3);
-X_tr = build_ernest_matrix (datasize_tr, cores_tr);
+full_X_tr = build_ernest_matrix (datasize_tr, cores_tr);
+X_tr = full_X_tr(:, features);
 
 y_tst = available_sample(idx_tst, 1);
 datasize_tst = available_sample(idx_tst, 2);
 cores_tst = available_sample(idx_tst, 3);
-X_tst = build_ernest_matrix (datasize_tst, cores_tst);
+full_X_tst = build_ernest_matrix (datasize_tst, cores_tst);
+X_tst = full_X_tst(:, features);
 
 if (n_missing > 0)
   y_miss = missing_sample(:, 1);
   datasize_miss = missing_sample(:, 2);
   cores_miss = missing_sample(:, 3);
-  X_miss = build_ernest_matrix (datasize_miss, cores_miss);
+  full_X_miss = build_ernest_matrix (datasize_miss, cores_miss);
+  X_miss = full_X_miss(:, features);
 else
   y_miss = NaN (0, 1);
-  X_miss = NaN (0, 4);
+  X_miss = NaN (0, sum (features));
 endif
 
 if (use_nnls)
