@@ -52,10 +52,12 @@ for (ii = 1:numel (distinct_queries))
     datasize_sample = query_sample(datasize_idx, [1 3]);
 
     distinct_cores = unique (datasize_sample(:, end));
-    proper_t = NaN (size (distinct_cores));
-    for (kk = 1:numel (distinct_cores))
-      cores_idx = (datasize_sample(:, end) == distinct_cores(kk));
-      proper_t(kk) = mean (datasize_sample(cores_idx, 1));
+    configurations = numel (distinct_cores);
+    proper_t = NaN (configurations, 1);
+
+    for (cc = 1:configurations)
+      cores_idx = (datasize_sample(:, end) == distinct_cores(cc));
+      proper_t(cc) = mean (datasize_sample(cores_idx, 1));
     endfor
 
     deviations = deadline - proper_t;
@@ -95,8 +97,13 @@ for (ii = 1:numel (distinct_queries))
     t_opt = t_feasible(idx);
     perc_err = 100 * (deadline - t_opt) / deadline;
 
+    if (all (infeasible))
+      c_opt = t_opt = perc_err = NaN;
+    endif
+
     results.(current_query) = [results.(current_query); ...
-                               current_datasize, c_opt, t_opt, perc_err];
+                               current_datasize, configurations, ...
+                               c_opt, t_opt, perc_err];
   endfor
 endfor
 
@@ -105,9 +112,11 @@ for ([matrix, query] = results)
   for (ii = 1:rows (matrix))
     query
     datasize = matrix(ii, 1)
-    c_opt = matrix(ii, 2)
-    t_opt =matrix(ii, 3)
+    configurations = matrix(ii, 2)
+    c_opt = matrix(ii, 3)
+    t_opt = matrix(ii, 4)
     deadline
-    perc_err = matrix(ii, 4)
+    perc_err = matrix(ii, 5)
+    printf ("\n");
   endfor
 endfor
