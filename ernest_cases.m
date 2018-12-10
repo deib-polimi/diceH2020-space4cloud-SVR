@@ -20,8 +20,8 @@ root = "/Users/eugenio/Dottorato/Experiment Results/Ernest/POWER8";
 job = "kmeans";
 
 use_nnls = true;
-features = true (1, 5);
-features(end) = false;
+features = true (1, 6);
+features(end - 1:end) = false;
 
 % Positive: training, negative: test
 if (ismember (job, {"query26"}))

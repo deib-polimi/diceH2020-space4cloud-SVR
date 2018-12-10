@@ -20,8 +20,8 @@ infile = "/Users/eugenio/Downloads/ernest/Q52-Azure-D12v2.csv";
 outdir = "/Users/eugenio/Downloads/ernest";
 
 use_nnls = true;
-features = true(1, 5);
-features(end) = false;
+features = true(1, 6);
+features(end - 1:end) = false;
 
 missing_cores = 32:4:52;
 missing_datasizes = [750 1000];

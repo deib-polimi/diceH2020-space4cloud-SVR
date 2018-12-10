@@ -19,8 +19,8 @@ clc;
 base_directory = "/Users/eugenio/Dottorato/Experiment Results/POWER8/full/ml/query40";
 
 use_nnls = true;
-features = true (1, 5);
-features(end) = false;
+features = true (1, 6);
+features(end - 1:end) = false;
 
 configuration.runs = [6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44];
 configuration.missing_runs = [];

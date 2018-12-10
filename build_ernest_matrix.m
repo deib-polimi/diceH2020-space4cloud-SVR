@@ -17,9 +17,10 @@
 ##
 ## Given a vector of @var{datasizes} and one of @var{machines},
 ## create the design matrix @var{X} to learn the Ernest model.
-## The last column is squared @var{datasizes} divided by
+## The last two columns are squared @var{datasizes} divided by
 ## @var{machines}, which is one of the additional features discussed
-## in their paper.
+## in their paper, and square root of @var{datasizes} divided by
+## @var{machines}.
 ##
 ## @end deftypefn
 
@@ -41,6 +42,7 @@ function X = build_ernest_matrix (datasizes, machines)
   s2m = datasizes .^ 2 ./ machines;
   lm = log2 (machines);
   one = ones (size (machines));
-  X = [one, sm, lm, machines, s2m];
+  rootm = sqrt (datasizes) ./ machines;
+  X = [one, sm, lm, machines, s2m, rootm];
 
 endfunction
