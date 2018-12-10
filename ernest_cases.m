@@ -17,7 +17,7 @@ close all hidden;
 clc;
 
 root = "/Users/eugenio/Dottorato/Experiment Results/Ernest/POWER8";
-job = "kmeans";
+job = "sparkdl";
 
 use_nnls = true;
 features = true (1, 6);
@@ -40,6 +40,8 @@ if (ismember (job, {"query26"}))
             [6 8 18 32 44]; ...
             [6 10 16 26 44]; ...
           };
+
+  cores_label = "nContainers";
 elseif (ismember (job, {"kmeans"}))
   datasizes = { [5 -5]; ...
                 [10 -10]; ...
@@ -59,6 +61,23 @@ elseif (ismember (job, {"kmeans"}))
             [6 10 16 24 34 48]; ...
             [6 16 26 36 46]; ...
           };
+
+  cores_label = "nContainers";
+elseif (ismember (job, {"sparkdl"}))
+  datasizes = { [1000 -1000]; ...
+                [1500 -1500]; ...
+                [2500 -2500]; ...
+                [1000 1500 -2500]; ...
+                [1000 2500 -1500]; ...
+                [1500 2500 -1000]; ...
+              };
+
+  cases = { [2 8 14 20 26 32 38 44]; ...
+            [2 10 18 26 34 42]; ...
+            [2 12 22 32 42]; ...
+          };
+
+  cores_label = "nCores";
 else
   error ("unrecognized job '%s'", job);
 endif
@@ -69,7 +88,7 @@ infile = fullfile (root, [job, ".csv"]);
 data = read_csv_table (infile, 0);
 t = data.applicationCompletionTime;
 datasize = data.dataSize;
-cores = data.nContainers;
+cores = data.(cores_label);
 full_ernest_matrix = build_ernest_matrix (datasize, cores);
 
 n_d = numel (datasizes);
@@ -148,5 +167,5 @@ for (dd = 1:n_d)
   endfor
 endfor
 
-warning (state_nearly_singular, "Octave:nearly-singular-matrix");
-warning (state_singular, "Octave:singular-matrix");
+warning (state_nearly_singular);
+warning (state_singular);
