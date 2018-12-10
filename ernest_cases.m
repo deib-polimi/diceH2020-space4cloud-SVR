@@ -80,6 +80,10 @@ max_train_pe = NaN (n_c, n_d);
 max_test_pe = NaN (n_c, n_d);
 n_train = NaN (n_c, n_d);
 n_test = NaN (n_c, n_d);
+exception = cell (n_c, n_d);
+
+state_nearly_singular = warning ("error", "Octave:nearly-singular-matrix");
+state_singular = warning ("error", "Octave:singular-matrix");
 
 for (dd = 1:n_d)
   current_datasizes = datasizes{dd};
@@ -116,12 +120,20 @@ for (dd = 1:n_d)
     X_tr = full_ernest_matrix(train_idx, features);
     X_tst = full_ernest_matrix(test_idx, features);
 
-    if (use_nnls)
-      theta = lsqnonneg (X_tr, y_tr);
-    else
-      pkg load statistics;
-      theta = regress (y_tr, X_tr);
-    endif
+
+    try
+      if (use_nnls)
+        theta = lsqnonneg (X_tr, y_tr);
+      else
+        pkg load statistics;
+        theta = regress (y_tr, X_tr);
+      endif
+    catch e
+      exception(cc, dd) = e;
+      warning ("datasize n. %d, case n. %d skipped due to an exception in training", ...
+               dd, cc);
+      continue;
+    end_try_catch
 
     y_hat_tr = X_tr * theta;
     y_hat_tst = X_tst * theta;
@@ -135,3 +147,6 @@ for (dd = 1:n_d)
     max_test_pe(cc, dd) = 100 * max (abs_residuals_test);
   endfor
 endfor
+
+warning (state_nearly_singular, "Octave:nearly-singular-matrix");
+warning (state_singular, "Octave:singular-matrix");
