@@ -17,7 +17,8 @@
 root="${1?error: missing data directory}"
 
 find "$root" -name '*.csv' | while IFS= read -r filename; do
-    relname="${filename#$root/}"
+    relname="${filename#$root}"
+    relname="${relname#/}"
 
     query="$(echo "$relname" | cut -d / -f 1)"
     base="$(basename "$filename")"

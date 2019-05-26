@@ -17,7 +17,8 @@
 root="${1?error: missing traces directory}"
 
 find "$root" -name summary.csv -type f | while IFS= read -r filename; do
-    relname="${filename#$root/}"
+    relname="${filename#$root}"
+    relname="${relname#/}"
 
     cores="$(echo "$relname" | cut -d / -f 1 | awk -F _ '{ print $1 * $2 }')"
     query="$(echo "$relname" | cut -d / -f 2)"
