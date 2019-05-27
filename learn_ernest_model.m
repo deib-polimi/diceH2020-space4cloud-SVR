@@ -37,7 +37,13 @@ for (ii = 1:numel (configuration.runs))
   data = read_csv_table (filename, 1);
   t = data.applicationCompletionTime - data.applicationDeltaBeforeComputing;
   datasize = data.dataSize;
-  cores = data.nContainers;
+
+  if (isfield (data, "nContainers"))
+    cores = data.nContainers;
+  else
+    cores = data.nCores;
+  endif
+
   experimental_data{ii} = [t, datasize, cores];
 endfor
 
